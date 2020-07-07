@@ -1,0 +1,20 @@
+# DFT details
+xc           pbe
+spin          collinear      # non-collinear spin
+relativistic      atomic_zora scalar # basis set (used zora for single-point, atom
+ic_zora for opt)
+charge         0.
+default_initial_moment 1
+# SCF CONVERGENCE
+occupation_type    gaussian 0.10     # this is required for metals
+charge_mix_param    0.2
+sc_accuracy_rho    1.E-4
+sc_accuracy_eev    1.E-3
+sc_accuracy_etot    1.E-4
+sc_iter_limit     1000
+# Relaxation
+relax_geometry        bfgs 1.E-2
+hessian_to_restart_geometry .false.
+write_restart_geometry    .true.
+# Performance
+load_balancing     .true.
