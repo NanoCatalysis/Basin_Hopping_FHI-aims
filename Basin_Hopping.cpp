@@ -620,3 +620,4 @@ cout<<" --> Maximum steps reached ... Stopping Basin Hopping algorithm"<<endl;
 
 return 0;
 }
+
