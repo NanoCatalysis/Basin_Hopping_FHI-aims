@@ -77,8 +77,7 @@ if(continue_alg==1)
   //_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
   //                                      RESTART ALGORITHM                                         //
   //_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
-  cout<<" --> Restarting algorithm! "<<endl;
-
+  cout<<" --> Restarting algorithm ...  "<<endl;
       string iteration_counter_i ="cd ";
              iteration_counter_i+=file_name;
              iteration_counter_i+=" ; ls coord*xyz | wc -l";
@@ -87,12 +86,15 @@ if(continue_alg==1)
              iteration_counter_m+=file_name;
              iteration_counter_m+="/rejected ; ls coord*xyz | wc -l ";
   m=int_pipe(iteration_counter_m,0);
-  //TAMBIEN HACE FALTA QUE LEA LAS ENERGÍAS
+     command.clear(); command=" cd "+file_name+" ; head -2 coordinates"+to_string(i)+".xyz | tail -1 | awk '{print $6 }' ";
+     Energy=float_pipe(command);
+     command.clear();
 
-   command.clear(); command="cd "+file_name+" ; if ! [ -f geometry.in.next_step ] ; ";
-   command+="then cp geometry.in geometry.in.next_step ; fi";
-   system(command.c_str());
-   command.clear();
+  cout<<" --> Last configuration i="<<i<<" ; last rejected m="<<m<<" ; total performed steps : "<<i+m<<endl;
+  cout<<" --> Restarting from coordinates"<<i<<".xyz "<<endl;
+  i++;
+  cout<<" --> Starting step "<<i<<endl;
+  m++;
 }
 else
 {
@@ -560,10 +562,6 @@ if (pow(2.71,(EnergiaAnterior-Energy)/k_BT) > random_number(0,1))
   {
      cout<<" --> Starting step "<<i+1<<endl;
   }
-  else
-  {
-    cout<<" --> Maximum steps reached ... Stopping Basin Hopping algorithm"<<endl;
-  }
   i++;
   fail_counter=0;
 }
@@ -617,7 +615,8 @@ else
   fail_counter=0;
 }
 
-
 } // END OF BH-LOOP
+cout<<" --> Maximum steps reached ... Stopping Basin Hopping algorithm"<<endl;
+
 return 0;
 }
