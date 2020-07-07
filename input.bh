@@ -1,0 +1,14 @@
+/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
+/_/_/_/_/_/_/_/_/_/_/_/_/_/ Basin Hopping  input file /_/_/_/_/_/_/_/_/_/_/_/_/
+/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
+
+        initialization_file = false
+        directory_name = Au5Ir5
+        continue = 0       # change to 1 to restart BH-DFT calculation
+        cluster_ntyp = [Au:5], [Ir:5]
+        temperature_K = 2500
+        step_width = 0.8   
+        swap_step = 5      # Swap atoms every
+        iterations = 10
+        randomness = 0      # 1-fully random         0-not so random
+        kick_type = 1       # 1-kick with potential  0-just kick
