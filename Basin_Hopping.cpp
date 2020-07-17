@@ -202,6 +202,7 @@ else
 
          if(crystal==0)
          {
+            clus.centroid();
             geometry_file.clear();
             geometry_file=file_name+"/geometry.in";
             clus.print_fhi(geometry_file);
@@ -339,6 +340,7 @@ while(i+m <= iteraciones)
   // Update geometries if in the gas-phase:
   if(crystal==0)
    {
+      clus.centroid();
       geometry_file.clear();
       geometry_file=file_name+"/geometry.in";
       clus.print_fhi(geometry_file);
@@ -347,6 +349,7 @@ while(i+m <= iteraciones)
   //.. or periodic case:
   else
    {
+      clus.centroid();
       clus.move((x_max-x_min)/2.0+random_number(-dist,dist),(y_max-y_min)/2.0+random_number(-dist,dist),z_max-clus.z_min() );
       geometry_file.clear();
       geometry_file=file_name+"/geometry.tmp";
@@ -490,12 +493,14 @@ while(i+m <= iteraciones)
 
      if(crystal==0)
      {
+        clus.centroid();
         geometry_file.clear();
         geometry_file=file_name+"/geometry.in";
         clus.print_fhi(geometry_file);
      }
      else
      {
+        clus.centroid();
         clus.move((x_max-x_min)/2.0+random_number(-dist,dist),(y_max-y_min)/2.0+random_number(-dist,dist),z_max-clus.z_min() );
         geometry_file.clear();
         geometry_file=file_name+"/geometry.tmp";
