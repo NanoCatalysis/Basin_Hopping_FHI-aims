@@ -36,16 +36,16 @@ Simbolo_1=string_pipe("grep 'cluster_ntyp' input.bh | cut -d '[' -f 2 | cut -d '
 Simbolo_2=string_pipe("grep 'cluster_ntyp' input.bh | cut -d '[' -f 3 | cut -d ':' -f 1 ");
 N_Simbolo_1=int_pipe("grep 'cluster_ntyp' input.bh | cut -d '[' -f 2 | cut -d ':' -f 2 | cut -d ']' -f 1 ");
 N_Simbolo_2=int_pipe("grep 'cluster_ntyp' input.bh | cut -d '[' -f 3 | cut -d ':' -f 2 | cut -d ']' -f 1 ");
-continue_alg=int_pipe("grep 'continue' input.bh | awk '{print $3}' ");
-initialization_file=string_pipe("grep 'initialization_file' input.bh | awk '{print $3}' ");
-randomness=int_pipe("grep 'randomness' input.bh | awk '{print $3}' ");
-kick=int_pipe("grep 'kick_type' input.bh | awk '{print $3}' ");
-file_name=string_pipe("grep 'directory_name' input.bh | awk '{print $3}' ");
-step_width=float_pipe("grep 'step_width' input.bh | awk '{print $3}' ");
-Temperature=float_pipe("grep 'temperature_K' input.bh | awk '{ print $3 }' ");
-Ncore=int_pipe("grep 'Ncore' input.bh | head -1 | awk '{print $3}' ");
-iteraciones=int_pipe("grep 'iterations' input.bh | awk '{ print $3 }' ");
-swap_step=int_pipe("grep 'swap_step' input.bh | awk '{ print $3 }' ");
+continue_alg=int_pipe("grep 'continue' input.bh | cut -d "=" -f2 | awk '{print $1}' ");
+initialization_file=string_pipe("grep 'initialization_file' input.bh | cut -d "=" -f2 | awk '{print $1}'");
+randomness=int_pipe("grep 'randomness' input.bh | cut -d "=" -f2 | awk '{print $1}'");
+kick=int_pipe("grep 'kick_type' input.bh  | cut -d "=" -f2 | awk '{print $1}' ");
+file_name=string_pipe("grep 'directory_name' input.bh | cut -d "=" -f2 | awk '{print $1}' ");
+step_width=float_pipe("grep 'step_width' input.bh | cut -d "=" -f2 | awk '{print $1}' ");
+Temperature=float_pipe("grep 'temperature_K' input.bh | cut -d "=" -f2 | awk '{print $1}' ");
+Ncore=int_pipe("grep 'Ncore' input.bh | head -1 | cut -d "=" -f2 | awk '{print $1}' ");
+iteraciones=int_pipe("grep 'iterations' input.bh | cut -d "=" -f2 | awk '{print $1}' ");
+swap_step=int_pipe("grep 'swap_step' input.bh | cut -d "=" -f2 | awk '{print $1}' ");
 crystal=int_pipe("cd input ; if [ -f crystal.in ]  ; then echo 1  ;  fi ");
 
 // Meta-parámetros /////
