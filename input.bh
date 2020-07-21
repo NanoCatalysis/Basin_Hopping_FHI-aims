@@ -11,5 +11,5 @@
         swap_step = 5      # Swap atoms every
         iterations = 10
         randomness = 0      # 1-fully random         0-not so random
-        kick_type = 1       # 1-kick with potential  0-just kick
+        kick_type = 1       # 1-simmulated_annealing-like  0-just kick
         lennard-jones_aid = 0 # 0-fully DFT  1-L-J optimization previus to DFT
