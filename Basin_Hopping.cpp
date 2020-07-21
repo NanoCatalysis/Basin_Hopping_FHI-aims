@@ -46,6 +46,7 @@ Temperature=float_pipe("grep 'temperature_K' input.bh | cut -d \"=\" -f2 | awk '
 Ncore=int_pipe("grep 'Ncore' input.bh | head -1 | cut -d \"=\" -f2 | awk '{print $1}' ");
 iteraciones=int_pipe("grep 'iterations' input.bh | cut -d \"=\" -f2 | awk '{print $1}' ");
 swap_step=int_pipe("grep 'swap_step' input.bh | cut -d \"=\" -f2 | awk '{print $1}' ");
+lj=int_pipe("grep 'lennard-jones_aid' input.bh | cut -d \"=\" -f2 | awk '{print $1}' ");
 crystal=int_pipe("cd input ; if [ -f crystal.in ]  ; then echo 1  ;  fi ");
 
 // Meta-parámetros /////
@@ -147,27 +148,31 @@ else
             {
                cout<<"   --> Using fully random generator "<<endl;
                clus.srand_generator(Simbolo_1,N_Simbolo_1,Simbolo_2,N_Simbolo_2);
-               cout<<"   --> Optimizing geometry with L-J potential "<<endl;
-               clus.geometry_optimization();
+               if(lj!=0)
+               {
+                  cout<<"   --> Optimizing geometry with L-J potential "<<endl;
+                  clus.geometry_optimization();
+               }
             }
             else if(randomness==0)//pseudorandomly (cuts Au80 cluster)
             {
                cout<<"   --> Cleaving Au80 cluster until get a "<<Simbolo_1<<N_Simbolo_1<<Simbolo_2<<N_Simbolo_2<<" new cluster "<<endl;
                clus.rand_generator(Simbolo_1,N_Simbolo_1,Simbolo_2,N_Simbolo_2);
-               cout<<"   --> Optimizing geometry with L-J potential "<<endl;
-               clus.geometry_optimization();
+               if(lj!=0)
+               {
+                  cout<<"   --> Optimizing geometry with L-J potential "<<endl;
+                  clus.geometry_optimization();
+               }
             }
             else if(randomness==2)// Roy-based generator
             {
                cout<<"   --> Using random generator based on Roy Jhonston "<<endl;
                clus.roy_generator(Simbolo_1,N_Simbolo_1,Simbolo_2,N_Simbolo_2);
-               cout<<"   --> Optimizing geometry with L-J potential "<<endl;
-               clus.geometry_optimization();
-            }
-            else if(randomness==3)// Roy-based generator
-            {
-               cout<<"   --> Using random generator based on Roy Jhonston "<<endl;
-               clus.roy_generator(Simbolo_1,N_Simbolo_1,Simbolo_2,N_Simbolo_2);
+               if(lj!=0)
+               {
+                  cout<<"   --> Optimizing geometry with L-J potential "<<endl;
+                  clus.geometry_optimization();
+               }
             }
          }
          else //Monometallic cases
@@ -176,27 +181,31 @@ else
             {
                cout<<"   --> Using fully random generator "<<endl;
                clus.srand_generator(Simbolo_1,N_Simbolo_1);
-               cout<<"   --> Optimizing geometry with L-J potential "<<endl;
-               clus.geometry_optimization();
+               if(lj!=0)
+               {
+                  cout<<"   --> Optimizing geometry with L-J potential "<<endl;
+                  clus.geometry_optimization();
+               }
             }
             else if(randomness==0)//pseudorandomly (cuts Au80 cluster)
             {
                cout<<"   --> Cleaving Au80 cluster until get a "<<Simbolo_1<<N_Simbolo_1<<" new cluster "<<endl;
                clus.rand_generator(Simbolo_1,N_Simbolo_1);
-               cout<<"   --> Optimizing geometry with L-J potential "<<endl;
-               clus.geometry_optimization();
+               if(lj!=0)
+               {
+                  cout<<"   --> Optimizing geometry with L-J potential "<<endl;
+                  clus.geometry_optimization();
+               }
             }
             else if(randomness==2)// Roy-based generator
             {
                cout<<"   --> Using random generator based on Roy Jhonston "<<endl;
                clus.roy_generator(Simbolo_1,N_Simbolo_1,Simbolo_2,N_Simbolo_2);
-               cout<<"   --> Optimizing geometry with L-J potential "<<endl;
-               clus.geometry_optimization();
-            }
-            else if(randomness==3)// Roy-based generator
-            {
-               cout<<"   --> Using random generator based on Roy Jhonston "<<endl;
-               clus.roy_generator(Simbolo_1,N_Simbolo_1,Simbolo_2,N_Simbolo_2);
+               if(lj!=0)
+               {
+                  cout<<"   --> Optimizing geometry with L-J potential "<<endl;
+                  clus.geometry_optimization();
+               }
             }
          }
 
@@ -437,27 +446,31 @@ while(i+m <= iteraciones)
            {
               cout<<"   --> Using fully random generator "<<endl;
               clus.srand_generator(Simbolo_1,N_Simbolo_1,Simbolo_2,N_Simbolo_2);
-              cout<<"   --> Optimizing geometry with L-J potential "<<endl;
-              clus.geometry_optimization();
+              if(lj!=0)
+              {
+                 cout<<"   --> Optimizing geometry with L-J potential "<<endl;
+                 clus.geometry_optimization();
+              }
            }
            else if(randomness==0)//pseudorandomly (cuts Au80 cluster)
            {
               cout<<"   --> Cleaving Au80 cluster until get a "<<Simbolo_1<<N_Simbolo_1<<Simbolo_2<<N_Simbolo_2<<" new cluster "<<endl;
               clus.rand_generator(Simbolo_1,N_Simbolo_1,Simbolo_2,N_Simbolo_2);
-              cout<<"   --> Optimizing geometry with L-J potential "<<endl;
-              clus.geometry_optimization();
+              if(lj!=0)
+              {
+                 cout<<"   --> Optimizing geometry with L-J potential "<<endl;
+                 clus.geometry_optimization();
+              }
            }
            else if(randomness==2)// Roy-based generator
            {
               cout<<"   --> Using random generator based on Roy Jhonston "<<endl;
               clus.roy_generator(Simbolo_1,N_Simbolo_1,Simbolo_2,N_Simbolo_2);
-              cout<<"   --> Optimizing geometry with L-J potential "<<endl;
-              clus.geometry_optimization();
-           }
-           else if(randomness==3)// Roy-based generator
-           {
-              cout<<"   --> Using random generator based on Roy Jhonston "<<endl;
-              clus.roy_generator(Simbolo_1,N_Simbolo_1,Simbolo_2,N_Simbolo_2);
+              if(lj!=0)
+              {
+                 cout<<"   --> Optimizing geometry with L-J potential "<<endl;
+                 clus.geometry_optimization();
+              }
            }
         }
         else //Monometallic cases
@@ -466,27 +479,31 @@ while(i+m <= iteraciones)
            {
               cout<<"   --> Using fully random generator "<<endl;
               clus.srand_generator(Simbolo_1,N_Simbolo_1);
-              cout<<"   --> Optimizing geometry with L-J potential "<<endl;
-              clus.geometry_optimization();
+              if(lj!=0)
+              {
+                 cout<<"   --> Optimizing geometry with L-J potential "<<endl;
+                 clus.geometry_optimization();
+              }
            }
            else if(randomness==0)//pseudorandomly (cuts Au80 cluster)
            {
               cout<<"   --> Cleaving Au80 cluster until get a "<<Simbolo_1<<N_Simbolo_1<<" new cluster "<<endl;
               clus.rand_generator(Simbolo_1,N_Simbolo_1);
-              cout<<"   --> Optimizing geometry with L-J potential "<<endl;
-              clus.geometry_optimization();
+              if(lj!=0)
+              {
+                 cout<<"   --> Optimizing geometry with L-J potential "<<endl;
+                 clus.geometry_optimization();
+              }
            }
            else if(randomness==2)// Roy-based generator
            {
               cout<<"   --> Using random generator based on Roy Jhonston "<<endl;
               clus.roy_generator(Simbolo_1,N_Simbolo_1,Simbolo_2,N_Simbolo_2);
-              cout<<"   --> Optimizing geometry with L-J potential "<<endl;
-              clus.geometry_optimization();
-           }
-           else if(randomness==3)// Roy-based generator
-           {
-              cout<<"   --> Using random generator based on Roy Jhonston "<<endl;
-              clus.roy_generator(Simbolo_1,N_Simbolo_1,Simbolo_2,N_Simbolo_2);
+              if(lj!=0)
+              {
+                 cout<<"   --> Optimizing geometry with L-J potential "<<endl;
+                 clus.geometry_optimization();
+              }
            }
         }
      }
