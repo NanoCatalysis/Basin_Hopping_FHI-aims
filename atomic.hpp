@@ -1735,15 +1735,13 @@ void Cluster::kick(float step_width)
 
    for(i=0;i<Nat;i++)
    {
-      DelX=((double)rand()/((double)RAND_MAX))*step_width;
-      DelY=((double)rand()/((double)RAND_MAX))*step_width;
-      DelZ=((double)rand()/((double)RAND_MAX))*step_width;
+    double Mrandom =  -1.0;
+    double Nrandom =  1.0;
 
-      atom[i].x[0]=DelX+atom[i].x[0];
-      atom[i].x[1]=DelY+atom[i].x[1];
-      atom[i].x[2]=DelZ+atom[i].x[2];
+    atom[i].x[0]= atom[i].x[0] + ( (Mrandom + (double)rand()/((double)RAND_MAX/(Nrandom-Mrandom+1)+1)) * step_width );
+    atom[i].x[1]= atom[i].x[1] + ( (Mrandom + (double)rand()/((double)RAND_MAX/(Nrandom-Mrandom+1)+1)) * step_width );
+    atom[i].x[2]= atom[i].x[2] + ( (Mrandom + (double)rand()/((double)RAND_MAX/(Nrandom-Mrandom+1)+1)) * step_width );
    }
-
 }
 
 
