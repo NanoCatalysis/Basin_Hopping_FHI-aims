@@ -1722,6 +1722,7 @@ void Cluster::rotate_Deg(float thetadeg, float phideg)
    }
 
 }
+
 /******************************  Kick *******************************/
 /***************** molecule_name.kick(step_width) *******************/
 /*********************** Cysteine.kick(0.8) *************************/
@@ -1729,18 +1730,16 @@ void Cluster::rotate_Deg(float thetadeg, float phideg)
 
 void Cluster::kick(float step_width)
 {
-
-   float DelX, DelY, DelZ;
    srand(time(NULL));
+   double Mrandom =  -1.0;
+   double Nrandom =  1.0;
 
    for(i=0;i<Nat;i++)
    {
-    double Mrandom =  -1.0;
-    double Nrandom =  1.0;
-
-    atom[i].x[0]= atom[i].x[0] + ( (Mrandom + (double)rand()/((double)RAND_MAX/(Nrandom-Mrandom+1)+1)) * step_width );
-    atom[i].x[1]= atom[i].x[1] + ( (Mrandom + (double)rand()/((double)RAND_MAX/(Nrandom-Mrandom+1)+1)) * step_width );
-    atom[i].x[2]= atom[i].x[2] + ( (Mrandom + (double)rand()/((double)RAND_MAX/(Nrandom-Mrandom+1)+1)) * step_width );
+      for(j=0;j<3;j++)
+      {
+         atom[i].x[j]= atom[i].x[j] + ( (Mrandom + (double)rand()/((double)RAND_MAX/(Nrandom-Mrandom+1)+1)) * step_width/2.0 );
+      }
    }
 }
 
