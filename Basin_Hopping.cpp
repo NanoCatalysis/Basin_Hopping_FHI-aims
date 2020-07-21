@@ -22,7 +22,7 @@
 string Simbolo_1, Simbolo_2, file_name, command, aux,geometry_file;
 string initialization_file, outputfile, i_str, E_str, tag;
 int continue_alg,  Ncore, randomness, kick, iteraciones,swap_step, contenido, previus;
-int m, N_Simbolo_1, N_Simbolo_2, count, fail_counter=0, resto, failed_max,crystal;
+int m, lj, N_Simbolo_1, N_Simbolo_2, count, fail_counter=0, resto, failed_max,crystal;
 float step_width, Temperature, Energy, Energia, EnergiaAnterior, k_BT, damp ;
 float x_min,y_min,z_min,x_max,y_max,z_max;
 Cluster clus_1, clus_2, clus, c_aux;
