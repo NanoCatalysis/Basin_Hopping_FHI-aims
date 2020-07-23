@@ -369,8 +369,8 @@ while(i+m <= iteraciones)
       geometry_file.clear();
       geometry_file=file_name+"/geometry.tmp";
       clus.print_fhi(geometry_file);
-      command="cat "+file_name+"/crystal.in > "+file_name+"/geometry.in ; sed '/atom/a initial_moment 0.5' "+file_name;
-      command+="/geometry.tmp >> "+file_name+"/geometry.in ; rm "+file_name+"/geometry.tmp" ;
+      command="cat "+file_name+"/crystal.in > "+file_name+"/geometry.in ; sed '/atom/a initial_moment 0.5' "+file_name+"/geometry.tmp >> "+file_name;
+      command+="/geometry.in ; rm "+file_name+"/geometry.tmp ";
       system(command.c_str());
       command.clear();
    }
@@ -528,8 +528,8 @@ while(i+m <= iteraciones)
         geometry_file.clear();
         geometry_file=file_name+"/geometry.tmp";
         clus.print_fhi(geometry_file);
-        command="cat "+file_name+"/crystal.in > "+file_name+"/geometry.in ; sed '/atom/a initial_moment 0.5' "+file_name;
-        command+="/geometry.tmp >> "+file_name+"/geometry.in ; rm "+file_name+"/geometry.tmp" ;
+        command="cat "+file_name+"/crystal.in > "+file_name+"/geometry.in ; sed '/atom/a initial_moment 0.5' "+file_name+"/geometry.tmp >> "+file_name;
+        command+="/geometry.in ; rm "+file_name+"/geometry.tmp ";
         system(command.c_str());
         command.clear();
      }
