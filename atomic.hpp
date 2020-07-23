@@ -184,7 +184,7 @@ class Cluster : public Atomic_Structure{
         void kick(float);
         void kick_lennard(float);
         void swap(int);
-        void srand_generator(string, int, string, int, float);
+        void srand_generator(string, int, string, int,float);
         void rand_generator(string, int, string, int);
         void roy_generator(string, int, string, int,float);
         void centroid();
@@ -1245,7 +1245,7 @@ void Cluster::rand_generator(string Symbol_1, int N_Symbol_1, string Symbol_2="A
 /*********** Cluster_name.srand_generator("Ir",3,range) *************/
 
 
-void Cluster::srand_generator(string Symbol_1, int N_Symbol_1, string Symbol_2="AAA", int N_Symbol_2=0, float epsilon=2.5)
+void Cluster::srand_generator(string Symbol_1, int N_Symbol_1, string Symbol_2="AAA", int N_Symbol_2=0,float compactness=1.5)
 {
 
    map<string, double> Radios;
@@ -1267,15 +1267,31 @@ void Cluster::srand_generator(string Symbol_1, int N_Symbol_1, string Symbol_2="
    atom=new Atom[Nat+1];
    int cont_S1=1;
    int cont_S2=0;
+   float _radio,phi,theta;
+   int contador_radios;
+   float volumen;
+   float r_1,r_2, radio_max;
+   int maximo_pasos_radio=Nat*10;
 
    if(strcmp(Symbol_2.c_str(),"AAA") != 0 )
    {
       type="bimetallic";
+      r_1=assign_radii(Radios,Symbol_1);
+      r_2=assign_radii(Radios,Symbol_2);
+      volumen=8*(N_Symbol_1* pow(r_1,3)+N_Symbol_2*pow(r_2,3));
    }
    else
    {
       type="monometallic";
+      r_1=assign_radii(Radios,Symbol_1);
+      volumen=8*(N_Symbol_1* pow(r_1,3));
    }
+   radio_max=compactness*pow((3*volumen/(4*3.1415926535)),0.333); //*0.75*pow(Nat,0.333);
+   //////////// Con probabilidades ///////////////
+   int num_enlaces;
+   float probabilidad;
+   ///////////////////////////////////////////////
+
 ///////////////////////////////Coloca el primer
 ///////////////////////////////átomo en el origen
    atom[0].Symbol=Symbol_1;  //o podría ser que
@@ -1289,6 +1305,7 @@ void Cluster::srand_generator(string Symbol_1, int N_Symbol_1, string Symbol_2="
    atom[0].R=assign_radii(Radios, atom[0].Symbol);
    for(i=1;i<Nat;i++)
    {
+cout<<i<<"  "<<radio_max<<endl;
       accepted=0;
       while(accepted==0)
       {
@@ -1331,26 +1348,34 @@ void Cluster::srand_generator(string Symbol_1, int N_Symbol_1, string Symbol_2="
          }
          atom[i].R=assign_radii(Radios, atom[i].Symbol);
 
-         Mx=atom[random].x[0]+epsilon;  //Maximum range for random X
-         Nx=atom[random].x[0]-epsilon;  //Minimun range for random x
-         My=atom[random].x[1]+epsilon;  //Maximum range for random y
-         Ny=atom[random].x[1]-epsilon;  //Minimum range for random y
-         Mz=atom[random].x[2]+epsilon;  //Maximum range for random z
-         Nz=atom[random].x[2]-epsilon;  //Minimum range for randon z
+         phi=random_number(0,2*3.1415926535);
+         theta=random_number(0,3.1415926535);
+         //_radio=random_number(atom[random].R,epsilon*(atom[random].R+atom[i].R));
+         _radio=atom[random].R+atom[i].R;
 
-         atom[i].x[0]=Nx+ ((double)rand())/((double)RAND_MAX )* (Mx-Nx);
-         atom[i].x[1]=Ny+ ((double)rand())/((double)RAND_MAX )* (My-Ny);
-         atom[i].x[2]=Nz+ ((double)rand())/((double)RAND_MAX )* (Mz-Nz);
+         Mx =_radio*sin(theta)*cos(phi);
+         My =_radio*sin(theta)*sin(phi);
+         Mz =_radio*cos(theta);
+
+         atom[i].x[0]=atom[random].x[0]+Mx;
+         atom[i].x[1]=atom[random].x[1]+My;
+         atom[i].x[2]=atom[random].x[2]+Mz;
 
          rejected=0;
 
          for(j=0;j<i;j++)
          {
+            if(contador_radios>maximo_pasos_radio)
+            {
+               radio_max=radio_max*1.01;
+               contador_radios=0;
+            }
             Distance=sqrt(pow(atom[i].x[0]-atom[j].x[0],2)+pow(atom[i].x[1]-atom[j].x[1],2)+pow(atom[i].x[2]-atom[j].x[2],2));
             criterio=atom[i].R+atom[j].R;
-            if(Distance<criterio)
+            if(Distance<criterio || Distance > radio_max)
             {
                rejected++;
+               contador_radios++;
             }
          }
 
@@ -1361,6 +1386,7 @@ void Cluster::srand_generator(string Symbol_1, int N_Symbol_1, string Symbol_2="
          else
          {
             accepted=1;
+            contador_radios=0;
             if(strcmp(atom[i].Symbol.c_str(),Symbol_1.c_str()) == 0 )
             {
                cont_S1++;
@@ -1407,7 +1433,7 @@ void Cluster::roy_generator(string Symbol_1, int N_Symbol_1, string Symbol_2="AA
    Nat=N_Symbol_1+N_Symbol_2;
    int random;
    int randomS;
-   double criterio;
+   double criterio, criterio2;
    int accepted=0;
    int rejected=0;
    float Mx,Nx,My,Ny,Mz,Nz;
@@ -1417,6 +1443,8 @@ void Cluster::roy_generator(string Symbol_1, int N_Symbol_1, string Symbol_2="AA
    atom=new Atom[Nat+1];
    int cont_S1=1;
    int cont_S2=0;
+   double Mrandom =  -1.0;
+   double Nrandom =  1.0;
 
    if(strcmp(Symbol_2.c_str(),"AAA") != 0 )
    {
@@ -1482,8 +1510,8 @@ void Cluster::roy_generator(string Symbol_1, int N_Symbol_1, string Symbol_2="AA
 
          atom[i].R=assign_radii(Radios, atom[i].Symbol);
 
-         double Mrandom =  -1.0;
-         double Nrandom =  1.0;
+         Mrandom =  -1.0;
+         Nrandom =  1.0;
 
          atom[i].x[0]= atom[random].x[0] + ((atom[i].R) * (Mrandom + (double)rand()/((double)RAND_MAX/(Nrandom-Mrandom+1)+1) ));
          atom[i].x[1]= atom[random].x[1] + ((atom[i].R) * (Mrandom + (double)rand()/((double)RAND_MAX/(Nrandom-Mrandom+1)+1) ));
@@ -1496,7 +1524,7 @@ void Cluster::roy_generator(string Symbol_1, int N_Symbol_1, string Symbol_2="AA
             Distance=sqrt(pow(atom[i].x[0]-atom[j].x[0],2)+pow(atom[i].x[1]-atom[j].x[1],2)+pow(atom[i].x[2]-atom[j].x[2],2));
             criterio=atom[i].R+atom[j].R;
 
-            double criterio2 = (2.2 * (1.5928235)*(pow(Nat,1.0/3.0))); // CHECK "as a function of size" e.g ---> (Nat / 2.0)
+            criterio2 = (2.2 * (criterio/2.0)*(pow(Nat,1.0/3.0))); // CHECK "as a function of size" e.g ---> (Nat / 2.0)
             if(Distance<criterio || Distance>criterio2)
             {
              cout<<"Criteria not reached"<<endl;
