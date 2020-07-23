@@ -222,17 +222,10 @@ else
             geometry_file=file_name+"/geometry.tmp";
             clus.print_fhi(geometry_file);
             command.clear();
-            // ============================ ORIGINAL (así estaba [sin initial moment])
-            // command="cat "+file_name+"/crystal.in > "+file_name+"/geometry.in ; cat "+file_name+"/geometry.tmp >> "+file_name;
-            // command+="/geometry.in ; rm "+file_name+"/geometry.tmp ";
-            // ============================ DEBERIA FUNCIONAR
-            command="cat "+file_name+"/crystal.in > "+file_name+"/geometry.in ; sed '/atom/a initial_moment 0.5' "+file_name+"/geometry.tmp >> "+file_name;
+            command="cat "+file_name+"/crystal.in > "+file_name+"/geometry.in ; cat "+file_name+"/geometry.tmp >> "+file_name;
             command+="/geometry.in ; rm "+file_name+"/geometry.tmp ";
-            // ============================ INITIAL MOMENT de Jonathan
-            //command="cat crystal.in > geometry.in ; sed '/atom/a initial_moment 0.5' geometry.tmp >> geometry.in ; rm geometry.tmp ";
             system(command.c_str());
             command.clear();
-           
 
          }
       }
@@ -369,8 +362,8 @@ while(i+m <= iteraciones)
       geometry_file.clear();
       geometry_file=file_name+"/geometry.tmp";
       clus.print_fhi(geometry_file);
-      command="cat "+file_name+"/crystal.in > "+file_name+"/geometry.in ; sed '/atom/a initial_moment 0.5' "+file_name+"/geometry.tmp >> "+file_name;
-      command+="/geometry.in ; rm "+file_name+"/geometry.tmp ";
+      command="cat "+file_name+"/crystal.in > "+file_name+"/geometry.in ; sed '/atom/a initial_moment 0.5' "+file_name;
+      command+="/geometry.tmp >> "+file_name+"/geometry.in ; rm "+file_name+"/geometry.tmp" ;
       system(command.c_str());
       command.clear();
    }
@@ -528,8 +521,8 @@ while(i+m <= iteraciones)
         geometry_file.clear();
         geometry_file=file_name+"/geometry.tmp";
         clus.print_fhi(geometry_file);
-        command="cat "+file_name+"/crystal.in > "+file_name+"/geometry.in ; sed '/atom/a initial_moment 0.5' "+file_name+"/geometry.tmp >> "+file_name;
-        command+="/geometry.in ; rm "+file_name+"/geometry.tmp ";
+        command="cat "+file_name+"/crystal.in > "+file_name+"/geometry.in ; sed '/atom/a initial_moment 0.5' "+file_name;
+        command+="/geometry.tmp >> "+file_name+"/geometry.in ; rm "+file_name+"/geometry.tmp" ;
         system(command.c_str());
         command.clear();
      }
@@ -549,8 +542,8 @@ while(i+m <= iteraciones)
 
 EnergiaAnterior=Energy;
 command="grep \" | Total energy of the DFT \" "+file_name+"/output.out | awk '{print $12}' ";
-Energy=float_pipe(command.c_str());
-E_str=string_pipe(command);
+Energy=float_pipe(command.c_str(),EnergiaAnterior);
+E_str=string_pipe(command,"Energy couldn't be obtained");
 command.clear();
 
 //_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
