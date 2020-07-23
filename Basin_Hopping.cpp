@@ -222,10 +222,17 @@ else
             geometry_file=file_name+"/geometry.tmp";
             clus.print_fhi(geometry_file);
             command.clear();
-            command="cat "+file_name+"/crystal.in > "+file_name+"/geometry.in ; cat "+file_name+"/geometry.tmp >> "+file_name;
+            // ============================ ORIGINAL (así estaba [sin initial moment])
+            // command="cat "+file_name+"/crystal.in > "+file_name+"/geometry.in ; cat "+file_name+"/geometry.tmp >> "+file_name;
+            // command+="/geometry.in ; rm "+file_name+"/geometry.tmp ";
+            // ============================ DEBERIA FUNCIONAR
+            command="cat "+file_name+"/crystal.in > "+file_name+"/geometry.in ; sed '/atom/a initial_moment 0.5' "+file_name+"/geometry.tmp >> "+file_name;
             command+="/geometry.in ; rm "+file_name+"/geometry.tmp ";
+            // ============================ INITIAL MOMENT de Jonathan
+            //command="cat crystal.in > geometry.in ; sed '/atom/a initial_moment 0.5' geometry.tmp >> geometry.in ; rm geometry.tmp ";
             system(command.c_str());
             command.clear();
+           
 
          }
       }
