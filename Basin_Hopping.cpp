@@ -1,31 +1,26 @@
 /*\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/
-# Implementation of the Basin Hopping (BH) algorithm for structure optimization
+# Implementation of the Genetic Algorithm (GA) algorithm for structure optimization
 #
-# Version X.X June 2020
+# Version X.X Octuber 2020
 #
 # BH algorithm has been implemented using C++;
 # coupled to FHI-aims X.X (DFT code as calculator)
 # It also works with newest XX version, XX
 #
 # Author : Jorge Refugio Fabila Fabian <jorge_fabila@ciencias.unam.mx> (IF-UNAM)
-# Author : Dr. Jonathan Casildo Luque Ceballos <jluque@fisica.unam.mx> (IF-UNAM)
 # Advisor : Dr. Oliver Paz Borbon <oliver_paz@fisica.unam.mx> (IF-UNAM)
-#
-# Financial Support (PAPIIT-UNAM): Project IA102716
-# Computational resources (Miztli-UNAM):  SC15-1-IG-82
-# SC16-1-IG-78
-#
 #
 # Note: Output folders will be generated in current directory
 \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\*/
 #include"atomic.hpp"
 string Simbolo_1, Simbolo_2, file_name, command, aux,geometry_file;
-string initialization_file, outputfile, i_str, E_str, tag;
+string initialization_file, outputfile, m_str, i_str, E_str, tag;
 int continue_alg,  Ncore, randomness, kick, iteraciones,swap_step, contenido, previus;
 int m, lj, N_Simbolo_1, N_Simbolo_2, count, fail_counter=0, resto, failed_max,crystal;
+int n_pop, element;
 float step_width, Temperature, Energy, Energia, EnergiaAnterior, k_BT, damp ;
 float x_min,y_min,z_min,x_max,y_max,z_max;
-Cluster clus_1, clus_2, clus, c_aux;
+Cluster clus_1, clus_2, c_aux;
 Crystal cristal;
 float dist;
 int main(int argc, char *argv[]){
@@ -37,6 +32,7 @@ Simbolo_2=string_pipe("grep 'cluster_ntyp' input.bh | cut -d '[' -f 3 | cut -d '
 N_Simbolo_1=int_pipe("grep 'cluster_ntyp' input.bh | cut -d '[' -f 2 | cut -d ':' -f 2 | cut -d ']' -f 1 ");
 N_Simbolo_2=int_pipe("grep 'cluster_ntyp' input.bh | cut -d '[' -f 3 | cut -d ':' -f 2 | cut -d ']' -f 1 ");
 continue_alg=int_pipe("grep 'continue' input.bh | cut -d \"=\" -f2 | awk '{print $1}' ");
+n_pop=int_pipe("grep 'n_pop' input.bh | cut -d \"=\" -f2 | awk '{print $1}' ");
 initialization_file=string_pipe("grep 'initialization_file' input.bh | cut -d \"=\" -f2 | awk '{print $1}'");
 randomness=int_pipe("grep 'randomness' input.bh | cut -d \"=\" -f2 | awk '{print $1}'");
 kick=int_pipe("grep 'kick_type' input.bh  | cut -d \"=\" -f2 | awk '{print $1}' ");
@@ -48,6 +44,8 @@ iteraciones=int_pipe("grep 'iterations' input.bh | cut -d \"=\" -f2 | awk '{prin
 swap_step=int_pipe("grep 'swap_step' input.bh | cut -d \"=\" -f2 | awk '{print $1}' ");
 lj=int_pipe("grep 'lennard-jones_aid' input.bh | cut -d \"=\" -f2 | awk '{print $1}' ");
 crystal=int_pipe("cd input ; if [ -f crystal.in ]  ; then echo 1  ;  fi ");
+Cluster clus[n_pop];
+double Fit[n_pop];
 // Meta-parámetros /////
 failed_max=3;         //
 damp=0.7;             //
@@ -77,23 +75,26 @@ if(continue_alg==1)
   //_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
   //                                      RESTART ALGORITHM                                         //
   //_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
+  //En vez de reinicio podriamos hacer que directamente lo genera desde aca
   cout<<" --> Restarting algorithm ...  "<<endl;
       string iteration_counter_i ="cd ";
              iteration_counter_i+=file_name;
-             iteration_counter_i+=" ; ls coord*xyz | wc -l";
+             iteration_counter_i+=" ; ls Generation* | wc -l";
   i=int_pipe(iteration_counter_i,1);
       string iteration_counter_m ="cd ";
              iteration_counter_m+=file_name;
-             iteration_counter_m+="/rejected ; ls coord*xyz | wc -l ";
+             iteration_counter_m+="/Generation"+to_string(i)+" ; ls -R | grep \"relaxed.xyz\" | wc -l"; //el -R nos da libertad de escoger nombres
   m=int_pipe(iteration_counter_m,0);
-     command.clear(); command=" cd "+file_name+" ; head -2 coordinates"+to_string(i)+".xyz | tail -1 | awk '{print $6 }' ";
+     command.clear(); command=" cd "+file_name+"/Generation"+to_string(i)+" ; head -2 current_minimum.xyz | tail -1 | awk '{print $6 }' ";
+     //RECUERDA: en cada generacion poner un current_minimum
      Energy=float_pipe(command);
      command.clear();
 
-  cout<<" --> Last configuration i="<<i<<" ; last rejected m="<<m<<" ; total performed steps : "<<i+m<<endl;
-  cout<<" --> Restarting from coordinates"<<i<<".xyz "<<endl;
-  i++;
-  cout<<" --> Starting step "<<i<<endl;
+  //cout<<" --> Last Generation i="<<i<<" ; last rejected m="<<m<<" ; total performed steps : "<<i+m<<endl;
+  cout<<" --> Last Generation i="<<i<<" ; "<<m<<"/"<<n_pop<<" relaxations performed : "<<i<<endl;
+  cout<<" --> Restarting from generation"<<i<<" and relaxation "<<m<<" "<<endl;
+//  i++;
+//  cout<<" --> Starting step "<<i<<endl;
   m++;
 }
 else
@@ -104,73 +105,73 @@ else
    cout<<" --> Starting a new search "<<endl;
    // Creates work directory
    command ="if [ -d "+file_name+" ] ; then mv "+file_name+" other_"+file_name;
-   command+=" ; fi ; mkdir "+file_name+" ; cd "+file_name+"  ; mkdir rejected ;";
-   command+=" cp ../input/* .";
+   command+=" ; fi ; mkdir "+file_name+" ; cd "+file_name+"  ; mkdir Generation1 ;";
+   command+=" cp ../input/* . ;";
    system(command.c_str());
    i=1; m=0;
    contenido=0;
-   count=1;
-
-   while(contenido!=1)
-   {
-      if(initialization_file.length() > 5 && count==1)
+//   while(contenido!=1)
+//   {
+      if(initialization_file.length() > 5)
       {
         cout<<" --> Reading initialization file from:  "<<initialization_file<<endl;
         //Generates geometry.in and then run FHI-aims, if geometry.in.next_step is not
         //genereted then anyway here is created as a copy of the original.
         /////////////////////////////////
-        command ="cp ";                //
+        command.clear(); command="cd "+file_name+"/Generation1 ; mkdir E"+to_string(m);
+        command+="cp ";                //
         command+=initialization_file;  //
-        command+=" "+file_name+"/geometry.in";
+        command+=" "+file_name+"/Generation1/E1/geometry.in";
         system(command.c_str());       //
         command.clear();               //
         /////////////////////////////////
         command ="cp ";                //
         command+=initialization_file;  //
-        command+=" "+file_name+"/geometry.in.next_step";
+        command+=" "+file_name+"/Generation1/E1/geometry.in.next_step";
         system(command.c_str());       //
         command.clear();               //
         /////////////////////////////////
-
-        count++;
+        cout<<" --> Generating a random population and adding initialization file from "<<initialization_file<<endl;
+        count=1;
       }
       else
       {
-         if(count>1)
-         {
-            cout<<" --> Failed SCF of initialization file "<<endl;
-         }
-         cout<<" --> Generating a random cluster "<<endl;
+//Genera Generation1/E1/geometry.in aleatorio
+         cout<<" --> Generating a random population "<<endl;
+         count=0;
+      }
+      for(element=count;element<n_pop;element++)
+      {
          if(N_Simbolo_2>0)  // For bimetallic cases
          {
             if(randomness==1)  // Fully random
             {
                cout<<"   --> Using fully random generator "<<endl;
-               clus.srand_generator(Simbolo_1,N_Simbolo_1,Simbolo_2,N_Simbolo_2);
+               clus[element].srand_generator(Simbolo_1,N_Simbolo_1,Simbolo_2,N_Simbolo_2);
                if(lj!=0)
                {
                   cout<<"   --> Optimizing geometry with L-J potential "<<endl;
-                  clus.geometry_optimization();
+                  clus[element].geometry_optimization();
                }
             }
             else if(randomness==0)//pseudorandomly (cuts Au80 cluster)
             {
                cout<<"   --> Cleaving Au80 cluster until get a "<<Simbolo_1<<N_Simbolo_1<<Simbolo_2<<N_Simbolo_2<<" new cluster "<<endl;
-               clus.rand_generator(Simbolo_1,N_Simbolo_1,Simbolo_2,N_Simbolo_2);
+               clus[element].rand_generator(Simbolo_1,N_Simbolo_1,Simbolo_2,N_Simbolo_2);
                if(lj!=0)
                {
                   cout<<"   --> Optimizing geometry with L-J potential "<<endl;
-                  clus.geometry_optimization();
+                  clus[element].geometry_optimization();
                }
             }
             else if(randomness==2)// Roy-based generator
             {
                cout<<"   --> Using random generator based on Roy Jhonston "<<endl;
-               clus.roy_generator(Simbolo_1,N_Simbolo_1,Simbolo_2,N_Simbolo_2);
+               clus[element].roy_generator(Simbolo_1,N_Simbolo_1,Simbolo_2,N_Simbolo_2);
                if(lj!=0)
                {
                   cout<<"   --> Optimizing geometry with L-J potential "<<endl;
-                  clus.geometry_optimization();
+                  clus[element].geometry_optimization();
                }
             }
          }
@@ -179,106 +180,110 @@ else
             if(randomness==1)  // fully random
             {
                cout<<"   --> Using fully random generator "<<endl;
-               clus.srand_generator(Simbolo_1,N_Simbolo_1);
+               clus[element].srand_generator(Simbolo_1,N_Simbolo_1);
                if(lj!=0)
                {
                   cout<<"   --> Optimizing geometry with L-J potential "<<endl;
-                  clus.geometry_optimization();
+                  clus[element].geometry_optimization();
                }
             }
             else if(randomness==0)//pseudorandomly (cuts Au80 cluster)
             {
                cout<<"   --> Cleaving Au80 cluster until get a "<<Simbolo_1<<N_Simbolo_1<<" new cluster "<<endl;
-               clus.rand_generator(Simbolo_1,N_Simbolo_1);
+               clus[element].rand_generator(Simbolo_1,N_Simbolo_1);
                if(lj!=0)
                {
                   cout<<"   --> Optimizing geometry with L-J potential "<<endl;
-                  clus.geometry_optimization();
+                  clus[element].geometry_optimization();
                }
             }
             else if(randomness==2)// Roy-based generator
             {
                cout<<"   --> Using random generator based on Roy Jhonston "<<endl;
-               clus.roy_generator(Simbolo_1,N_Simbolo_1,Simbolo_2,N_Simbolo_2);
+               clus[element].roy_generator(Simbolo_1,N_Simbolo_1,Simbolo_2,N_Simbolo_2);
                if(lj!=0)
                {
                   cout<<"   --> Optimizing geometry with L-J potential "<<endl;
-                  clus.geometry_optimization();
+                  clus[element].geometry_optimization();
                }
             }
          }
-
+         command.clear(); command="cd "+file_name+"/Generation1 ; mkdir E"+to_string(element);
+         system(command.c_str());
+         command.clear();
          if(crystal==0)
          {
-            clus.centroid();
+            clus[element].centroid();
             geometry_file.clear();
-            geometry_file=file_name+"/geometry.in";
-            clus.print_fhi(geometry_file);
+            geometry_file=file_name+"/Generation1/E"+to_string(element)+"/geometry.in";
+            clus[element].print_fhi(geometry_file);
          }
          else{
-            clus.centroid();
-            clus.move((x_max-x_min)/2.0+random_number(-dist,dist),(y_max-y_min)/2.0+random_number(-dist,dist),z_max-clus.z_min());
+            clus[element].centroid();
+            clus[element].move((x_max-x_min)/2.0+random_number(-dist,dist),(y_max-y_min)/2.0+random_number(-dist,dist),z_max-clus[element].z_min());
             geometry_file.clear();
-            geometry_file=file_name+"/geometry.tmp";
-            clus.print_fhi(geometry_file);
-            command.clear();
-            command="cat "+file_name+"/crystal.in > "+file_name+"/geometry.in ; cat "+file_name+"/geometry.tmp >> "+file_name;
-            command+="/geometry.in ; rm "+file_name+"/geometry.tmp ";
+            geometry_file=file_name+"/Generation1/E"+to_string(element)+"/geometry.in";
+            clus[element].print_fhi(geometry_file);
+            command="cat "+file_name+"/crystal.in > "+geometry_file+" ; sed '/atom/a initial_moment 0.5' "+file_name;
+            command+="/geometry.tmp >> "+geometry_file+" ; rm "+file_name+"/geometry.tmp" ;
             system(command.c_str());
             command.clear();
-
          }
       }
+      m=0;
+//// ACA TERMINA EL FOR que genera la generacion inicial
+}
+      cout<<" --> Starting FHI-aims calculations "<<endl;
 
-      // RUN FIRST CONFIGURATION:
-      cout<<" --> Starting FHI-aims calculation "<<endl;
-      command.clear();
-      command="cd "+file_name+" ; ./run.sh";
+      command="echo 'Step ----> Energy[eV]' >> "+file_name+"/Generation1/energies.txt ";
       system(command.c_str());
       command.clear();
-      command="grep 'Have a nice day' "+file_name+"/output.out | wc -l";
-      contenido=int_pipe(command.c_str());
-      if(contenido==0)
-      {
-         cout<<" --> SCF failed. A new configuration will be created  "<<endl;
-      }
+cout<<"Entering loop"<<endl;
+for(m=m;m<n_pop;m++)
+{
+  cout<<m<<endl;
       command.clear();
-   }
+      command="cd "+file_name+"/Generation1/E"+to_string(m)+" ; cp ../../run.sh .";
+      command+=" ; cp ../../control.in .";
+      system(command.c_str());
+      command.clear();
+      command="cd "+file_name+"/Generation1/E"+to_string(m)+" ; ./run.sh";
+      system(command.c_str());
+      command.clear();
+      // Tal vez contenido ya no se use
+      command="grep 'Have a nice day' "+file_name+"/Generation1/E"+to_string(m)+"/output.out | wc -l";
+      contenido=int_pipe(command.c_str());
+      command.clear();
    /// Store energy and optimized geometry:
-   command="grep \" | Total energy of the DFT \" "+file_name+"/output.out | awk '{print $12}' ";
+   command="grep \" | Total energy of the DFT \" "+file_name+"/Generation1/E"+to_string(m)+"/output.out | awk '{print $12}' ";
+/////////////////////////////////////////
+/////////////////////////////////////////
+/////////////////////////////////////////
+// Esto es lo k esta dando lata porque no existe el output.out con la E
    Energy=double_pipe(command.c_str());
-   i_str=to_string(i);
+   m_str=to_string(m);
    E_str=string_pipe(command); //Better for Energies with all the value
    command.clear();
    // get initial, relaxed geometry and store it as xyz (first xyz!)
-   command=file_name+"/geometry.in.next_step";
-   clus.read_fhi(command);
+   command=file_name+"/Generation1/E"+to_string(m)+"/geometry.in.next_step";
+   clus[element].read_fhi(command);
    command.clear();
-   command=file_name+"/coordinates1.xyz";
+   command=file_name+"/Generation1/E"+to_string(m)+"/relaxed_coordinates.xyz";
    tag.clear();
-   tag=" Iteration "+i_str+" -----> Energy = "+E_str+" eV ";
-   clus.print_xyz(command,tag);
+   tag=" Iteration "+m_str+" -----> Energy = "+E_str+" eV ";
+   clus[element].print_xyz(command,tag);
    command.clear();
 
-   // store first output and geometry files:
-   command="mv "+file_name+"/output.out "+file_name+"/output1.out";
+   command="echo '"+to_string(m)+" ---->' "+E_str+" >> "+file_name+"/Generation1/energies.txt";
    system(command.c_str());
    command.clear();
+}
+   // Starting main GA loop
 
-   command="mv "+file_name+"/geometry.in "+file_name+"/geometry1.in";
-   system(command.c_str());
-   command.clear();
-
-   command="echo 'Step ----> Energy[eV]' >> "+file_name+"/energies.txt ; echo '1 ---->' "+E_str+" >> "+file_name+"/energies.txt";
-   system(command.c_str());
-   command.clear();
-
-   // NOW THE BASIN HOPPING WILL BEGIN:
-
-   cout<<" --> Relaxation of initial configuration: DONE! "<<endl;
-   cout<<" --> BH-DFT routine starts here "<<endl;
+   cout<<" --> Initial generation: DONE! "<<endl;
+   cout<<" --> AG-DFT routine starts here "<<endl;
    cout<<"  "<<endl;
-   cout<<" --> Starting step 2 "<<endl;
+   cout<<" --> Starting generation 2 "<<endl;
 
 /*   cout<<"================================================================================================"<<endl;
    cout<<"BH-DFT routine starts here! "<<endl;
@@ -287,9 +292,12 @@ else
    cout<<"For bimetallic clusters  : 1 atomic swap will be performed after "<<swap_step<<" moves "<<endl;
    cout<<"================================================================================================"<<endl;*/
    i=2;
-}
+
+/*
 while(i+m <= iteraciones)
 {
+  /// Instead of kick / swap write a new loop (over elements of generation)
+  /// In order to get energies, fitting and mates
   resto=i%swap_step;
 
   i_str.clear();
@@ -638,6 +646,6 @@ else
 
 } // END OF BH-LOOP
 cout<<" --> Maximum steps reached ... Stopping Basin Hopping algorithm"<<endl;
-
+*/
 return 0;
 }
